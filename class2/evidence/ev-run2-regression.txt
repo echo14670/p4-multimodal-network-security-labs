@@ -1,0 +1,197 @@
+CLASS-2 EVIDENCE - original three-modality regression
+date: Sat Sep 19 05:46:47 AM EDT 2026
+
+== mininet CLI transcript (pingall / ping6 / source routing) ==
+(p4dev-python-venv) p4@p4dev:~/demo02$ make
+mkdir -p build pcaps logs
+p4c-bm2-ss --p4v 16 --p4runtime-files build/polymorphic.p4.p4info.txtpb -o build/polymorphic.json polymorphic.p4
+polymorphic.p4(12): [--Wwarn=unused] warning: 'ARP_HTYPE_ETHERNET' is unused
+const bit<16> ARP_HTYPE_ETHERNET = 0x0001;
+              ^^^^^^^^^^^^^^^^^^
+polymorphic.p4(13): [--Wwarn=unused] warning: 'ARP_PTYPE_IPV4' is unused
+const bit<16> ARP_PTYPE_IPV4 = 0x0800;
+              ^^^^^^^^^^^^^^
+polymorphic.p4(14): [--Wwarn=unused] warning: 'ARP_HLEN_ETHERNET' is unused
+const bit<8> ARP_HLEN_ETHERNET = 6;
+             ^^^^^^^^^^^^^^^^^
+polymorphic.p4(15): [--Wwarn=unused] warning: 'ARP_PLEN_IPV4' is unused
+const bit<8> ARP_PLEN_IPV4 = 4;
+             ^^^^^^^^^^^^^
+polymorphic.p4(16): [--Wwarn=unused] warning: 'ARP_OPER_REQUEST' is unused
+const bit<16> ARP_OPER_REQUEST = 1;
+              ^^^^^^^^^^^^^^^^
+sudo PATH=/home/p4/bin:/home/p4/tutorials/vm-ubuntu-24.04:/home/p4/src/behavioral-model/tools:/usr/local/bin:/home/p4/src/p4dev-python-ve
+nv/bin:/home/p4/tutorials/vm-ubuntu-24.04:/home/p4/src/behavioral-model/tools:/usr/local/bin:/home/p4/src/p4dev-python-venv/bin:/usr/loca
+l/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python p
+ython3 /home/p4/demo02/utils/run_exercise.py -t topo/topology.json -j build/polymorphic.json -b simple_switch_grpc
+Reading topology file.
+Building mininet topology.
+simple_switch_grpc -i 1@s1-eth1 -i 2@s1-eth2 -i 3@s1-eth3 -i 4@s1-eth4 -i 5@s1-eth5 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-
+0-log.ipc --device-id 0 build/polymorphic.json --log-console --thrift-port 9090 -- --grpc-server-addr 0.0.0.0:50051
+simple_switch_grpc -i 1@s2-eth1 -i 3@s2-eth3 -i 4@s2-eth4 -i 5@s2-eth5 -i 2@s2-eth2 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-
+1-log.ipc --device-id 1 build/polymorphic.json --log-console --thrift-port 9091 -- --grpc-server-addr 0.0.0.0:50052
+simple_switch_grpc -i 1@s11-eth1 -i 2@s11-eth2 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-2-log.ipc --device-id 2 build/polymor
+phic.json --log-console --thrift-port 9092 -- --grpc-server-addr 0.0.0.0:50053
+simple_switch_grpc -i 1@s12-eth1 -i 2@s12-eth2 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-3-log.ipc --device-id 3 build/polymor
+phic.json --log-console --thrift-port 9093 -- --grpc-server-addr 0.0.0.0:50054
+simple_switch_grpc -i 1@s21-eth1 -i 2@s21-eth2 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-4-log.ipc --device-id 4 build/polymor
+phic.json --log-console --thrift-port 9094 -- --grpc-server-addr 0.0.0.0:50055
+simple_switch_grpc -i 2@s22-eth2 -i 1@s22-eth1 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-5-log.ipc --device-id 5 build/polymor
+phic.json --log-console --thrift-port 9095 -- --grpc-server-addr 0.0.0.0:50056
+simple_switch_grpc -i 1@s31-eth1 -i 2@s31-eth2 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-6-log.ipc --device-id 6 build/polymor
+phic.json --log-console --thrift-port 9096 -- --grpc-server-addr 0.0.0.0:50057
+simple_switch_grpc -i 2@s32-eth2 -i 1@s32-eth1 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-7-log.ipc --device-id 7 build/polymor
+phic.json --log-console --thrift-port 9097 -- --grpc-server-addr 0.0.0.0:50058
+simple_switch_grpc -i 1@s41-eth1 -i 2@s41-eth2 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-8-log.ipc --device-id 8 build/polymor
+phic.json --log-console --thrift-port 9098 -- --grpc-server-addr 0.0.0.0:50059
+simple_switch_grpc -i 2@s42-eth2 -i 1@s42-eth1 --pcap /home/p4/demo02/pcaps --nanolog ipc:///tmp/bm-9-log.ipc --device-id 9 build/polymor
+phic.json --log-console --thrift-port 9099 -- --grpc-server-addr 0.0.0.0:50060
+Warning: No control plane file provided for switch s1.
+Warning: No control plane file provided for switch s2.
+Warning: No control plane file provided for switch s11.
+Warning: No control plane file provided for switch s12.
+Warning: No control plane file provided for switch s21.
+Warning: No control plane file provided for switch s22.
+Warning: No control plane file provided for switch s31.
+Warning: No control plane file provided for switch s32.
+Warning: No control plane file provided for switch s41.
+Warning: No control plane file provided for switch s42.
+s1 -> gRPC port: 50051
+s2 -> gRPC port: 50052
+s11 -> gRPC port: 50053
+s12 -> gRPC port: 50054
+s21 -> gRPC port: 50055
+s22 -> gRPC port: 50056
+s31 -> gRPC port: 50057
+s32 -> gRPC port: 50058
+s41 -> gRPC port: 50059
+s42 -> gRPC port: 50060
+**********
+h1
+default interface: eth0 10.0.1.1        08:00:00:00:01:01
+**********
+**********
+h2
+default interface: eth0 10.0.2.2        08:00:00:00:02:02
+**********
+Starting mininet CLI
+======================================================================
+Welcome to the BMV2 Mininet CLI!
+======================================================================
+Your P4 program is installed into the BMV2 software switch
+and your initial runtime configuration is loaded. You can interact
+with the network using the mininet CLI below.
+To inspect or change the switch configuration, connect to
+its CLI from your host operating system using this command:
+  simple_switch_CLI --thrift-port <switch thrift port>
+To view a switch log, run this command from your host OS:
+  tail -f /home/p4/demo02/logs/<switchname>.log
+To view the switch output pcap, check the pcap files in /home/p4/demo02/pcaps:
+ for example run:  sudo tcpdump -xxx -r s1-eth1.pcap
+To view the P4Runtime requests sent to the switch, check the
+corresponding txt file in /home/p4/demo02/logs:
+ for example run:  cat /home/p4/demo02/logs/s1-p4runtime-requests.txt
+mininet> pingall
+*** Ping: testing ping reachability
+h1 -> h2
+h2 -> h1
+*** Results: 0% dropped (2/2 received)
+mininet> h1 ping6 -c 2 fe80::5678%eth0
+PING fe80::5678%eth0 (fe80::5678%eth0) 56 data bytes
+64 bytes from fe80::5678%eth0: icmp_seq=1 ttl=60 time=22.9 ms
+64 bytes from fe80::5678%eth0: icmp_seq=2 ttl=60 time=5.70 ms
+--- fe80::5678%eth0 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1004ms
+rtt min/avg/max/mdev = 5.695/14.312/22.930/8.617 ms
+mininet> h2 ping6 -c 2 fe80::1234%eth0
+PING fe80::1234%eth0 (fe80::1234%eth0) 56 data bytes
+64 bytes from fe80::1234%eth0: icmp_seq=1 ttl=60 time=10.0 ms
+64 bytes from fe80::1234%eth0: icmp_seq=2 ttl=60 time=5.85 ms
+--- fe80::1234%eth0 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1022ms
+rtt min/avg/max/mdev = 5.847/7.945/10.043/2.098 ms
+mininet> h2 bash /tmp/live/recvfwd.sh
+RECV_FWD_STARTED on h2 (log /tmp/recv-fwd.log)
+mininet> h1 bash /tmp/live/srfwd.sh
+SR_SENT h1->h2 stack=4 2 2 1
+mininet> h1 bash /tmp/live/recvrev.sh
+RECV_REV_STARTED on h1 (log /tmp/recv-rev.log)
+mininet> h2 bash /tmp/live/srrev.sh
+SR_SENT h2->h1 stack=4 1 1 1
+mininet> pingall
+*** Ping: testing ping reachability
+h1 -> h2
+h2 -> h1
+*** Results: 0% dropped (2/2 received)
+mininet> h1 ping6 -c 2 fe80::5678%eth0
+PING fe80::5678%eth0 (fe80::5678%eth0) 56 data bytes
+64 bytes from fe80::5678%eth0: icmp_seq=1 ttl=60 time=23.0 ms
+64 bytes from fe80::5678%eth0: icmp_seq=2 ttl=60 time=8.10 ms
+--- fe80::5678%eth0 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1018ms
+rtt min/avg/max/mdev = 8.104/15.568/23.033/7.464 ms
+mininet> h2 ping6 -c 2 fe80::1234%eth0
+PING fe80::1234%eth0 (fe80::1234%eth0) 56 data bytes
+64 bytes from fe80::1234%eth0: icmp_seq=1 ttl=60 time=29.2 ms
+64 bytes from fe80::1234%eth0: icmp_seq=2 ttl=60 time=6.17 ms
+--- fe80::1234%eth0 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1024ms
+rtt min/avg/max/mdev = 6.172/17.710/29.249/11.538 ms
+mininet> h1 bash /tmp/live/sendpoly.sh
+POLY_SEND src=10.0.1.1 dst=10.0.2.2 dport=5000 protected_hex=636c617373322d746573740000000000
+mininet> h2 bash /tmp/live/sendpoly-rev.sh
+POLY_SEND src=10.0.2.2 dst=10.0.1.1 dport=5000 protected_hex=726576657273652d7465737400000000
+mininet>
+
+== host side prompts that were issued ==
+   mininet> pingall                     -> 0% dropped (2/2 received)
+   mininet> h1 ping6 -c 2 fe80::5678%eth0 -> 2 received, 0% packet loss
+   mininet> h2 ping6 -c 2 fe80::1234%eth0 -> 2 received, 0% packet loss
+
+== source routing forward h1->h2, stack 4 2 2 1 ==
+--- s1-eth4_out
+05:41:28.708689 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+05:43:51.402944 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 78: 
+--- s31-eth1_in
+05:41:28.708865 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+05:43:51.402957 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 78: 
+--- s31-eth2_out
+05:41:28.710121 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+05:43:51.413750 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 76: 
+--- s32-eth1_in
+05:41:28.710144 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+05:43:51.415615 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 76: 
+--- s32-eth2_out
+05:41:28.711787 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+05:43:51.421031 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 74: 
+--- s2-eth4_in
+05:41:28.711815 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+05:43:51.421045 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 74: 
+--- s2-eth1_out (decapsulated towards h2)
+05:41:28.713521 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype IPv4 (0x0800), length 42: 10.0.1.1.1234 > 10.0.2.2.4321: UDP, length 0
+
+== source routing reverse h2->h1, stack 4 1 1 1 ==
+--- s2-eth4_out
+05:41:38.929092 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+05:45:18.876683 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 78: 
+--- s32-eth2_in
+05:41:38.929108 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+05:45:18.877070 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 78: 
+--- s32-eth1_out
+05:41:38.930009 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+05:45:18.880686 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 76: 
+--- s31-eth2_in
+05:41:38.930030 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+05:45:18.880702 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 76: 
+--- s31-eth1_out
+05:41:38.933165 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+05:45:18.917081 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 74: 
+--- s1-eth4_in
+05:41:38.933182 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+05:45:18.917102 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 74: 
+--- s1-eth1_out (decapsulated towards h1)
+05:41:38.936276 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype IPv4 (0x0800), length 42: 10.0.2.2.1234 > 10.0.1.1.4321: UDP, length 0
+
+== receive.py on the destination hosts ==
+/tmp/recv-fwd.log:4
+/tmp/recv-rev.log:2

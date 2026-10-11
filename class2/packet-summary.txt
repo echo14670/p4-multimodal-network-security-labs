@@ -1,0 +1,173 @@
+实验二 模态调度与异构封装 · 过程与结果记录（M1–M4）
+=====================================================================
+记录日期：2026-09-19
+运行环境：P4 tutorials 2026-08-01 镜像（VM p4dev，Ubuntu 24.04，p4c 1.2.5.15，
+          simple_switch_grpc 1.15.4），项目目录 ~/demo02（由实验一产物 ~/demo01 复制）
+完成范围：指导书本次要求的 M1–M4
+          M5（目的网关 2/3 多数裁决）与 M6（透明还原）留到下次实验，未实现
+传输层方案：UDP，目的端口 5000，定长 16 字节 protected_data（材料参考方案）
+本轮记录：一次干净运行（主机只发一份 → 源网关复制三份 → 三条物理路径），
+          回归测试与实验二功能在同一次运行中完成；正反向各一段。
+          所有截图均为虚拟机终端界面的原始抓屏（见第 6 节）。
+
+---------------------------------------------------------------------
+1. 主机只发送一份的证据
+---------------------------------------------------------------------
+发送脚本 send-poly.py 每次调用只打印一条 POLY_SEND，实测输出：
+
+  正向（h1 -> h2）：
+  POLY_SEND src=10.0.1.1 dst=10.0.2.2 dport=5000 protected_hex=636c617373322d746573740000000000
+            （636c617373322d746573740000000000 = "class2-test" 补齐 16 字节）
+
+  反向（h2 -> h1）：
+  POLY_SEND src=10.0.2.2 dst=10.0.1.1 dport=5000 protected_hex=726576657273652d7465737400000000
+            （726576657273652d7465737400000000 = "reverse-test" 补齐 16 字节）
+
+两次调用各只出现一条 POLY_SEND（见 evidence/ev-run2-sender-stdout.txt、截图 1 与截图 4
+的 mininet 窗格），说明进入网络的主机报文只有一份。
+
+三份副本由源网关内部的 PRE multicast group 10 产生，不是主机各发一份：
+控制器为 S1、S2 各下发一份 group 10，replicas 为 (出口 2, instance 1)、
+(出口 3, instance 2)、(出口 4, instance 3)，见 ev-run2-control-plane.txt 与截图 5。
+
+---------------------------------------------------------------------
+2. 序号与 CRC 的产生位置
+---------------------------------------------------------------------
+位置：数据面 Ingress 的 start_polymorphic 动作（polymorphic_schedule 表命中后执行），
+      在报文复制之前完成，因此三份副本共享同一组关联信息；Egress 只按出口写
+      modality_id，不重新生成序号。
+
+序号：Ingress 中的 register<bit<32>>(1) seq_reg 读改写，首包为 1（本次正反向实验报文
+      都取到 sequence_number = 1）。
+
+CRC32：Ingress 用 hash(..., HashAlgorithm.crc32, 0, {...}, 0xFFFFFFFF) 计算，写入
+      PolyShim.source_crc32，覆盖字段与顺序为：
+        inner_ipv4.srcAddr, inner_ipv4.dstAddr, inner_ipv4.protocol,
+        udp.srcPort, udp.dstPort, protectedData.value(128bit)
+      不含 TTL 与外层地址等逐跳变化字段（下次实验目的网关需按同一顺序重算）。
+
+---------------------------------------------------------------------
+3. 三份副本的序列号与模态编号（本轮实测，decode-poly.py 解码）
+---------------------------------------------------------------------
+正向 h1->h2（源网关 S1 的三个出口，载荷 class2-test，内层 UDP 5000<-63074）：
+
+  出口文件            外层协议                      sequence  modality  source_crc32
+  s1-eth2_out         IPv4 proto=253                1         1         0x06ba1552
+  s1-eth3_out         IPv6 nextHdr=253              1         2         0x06ba1552
+  s1-eth4_out         0x1234 + SR 栈 2 2 1(bos)     1         3         0x06ba1552
+  SUMMARY frames_with_polyshim=3 sequence_numbers=[1] modalities=[1, 2, 3]
+          directions=[0] source_crc32=['0x06ba1552'] same_sequence=yes same_crc=yes
+
+反向 h2->h1（源网关 S2 的三个出口，载荷 reverse-test，内层 UDP 5000<-60389）：
+
+  出口文件            外层协议                      sequence  modality  source_crc32
+  s2-eth2_out         IPv4 proto=253                1         1         0xdd4b3c83
+  s2-eth3_out         IPv6 nextHdr=253              1         2         0xdd4b3c83
+  s2-eth4_out         0x1234 + SR 栈 1 1 1(bos)     1         3         0xdd4b3c83
+  SUMMARY frames_with_polyshim=3 sequence_numbers=[1] modalities=[1, 2, 3]
+          directions=[1] source_crc32=['0xdd4b3c83'] same_sequence=yes same_crc=yes
+
+三份副本的 PolyShim 内容除 modality_id 外完全一致；内层 IPv4/UDP/protected_data 三份相同。
+（正向 CRC 与反向 CRC 不同，因为内层地址与 UDP 源端口不同；同一次发送的三份副本 CRC 相同。）
+
+---------------------------------------------------------------------
+4. 三个出口、外层协议与路径的对应关系
+---------------------------------------------------------------------
+  源网关出口  模态  modality_id  外层封装           正向路径（h1->h2）            反向路径（h2->h1）
+     2        IPv4      1        protocol=253       s1-s11-s12-s2                s2-s12-s11-s1
+     3        IPv6      2        nextHdr=253        s1-s21-s22-s2                s2-s22-s21-s1
+     4        SR        3        EtherType=0x1234   s1-s31-s32-s2                s2-s32-s31-s1
+
+到达对端网关的实测（decode-poly.py 解码对端网关入口 pcap）：
+  正向：s2-eth2_in / s2-eth3_in / s2-eth4_in 各一份副本，sequence=1，modality 1/2/3，
+        crc32 均为 0x06ba1552，外层 TTL/hopLimit 由 64 减到 62，SR 栈已消耗为 1(bos)
+  反向：s1-eth2_in / s1-eth3_in / s1-eth4_in 各一份副本，sequence=1，modality 1/2/3，
+        crc32 均为 0xdd4b3c83，外层 TTL/hopLimit 62
+
+SR 分支逐跳消耗（ev-run2-regression.txt 的 0x1234 报文长度，正向 78→76→74→还原）：
+  s1-eth4_out(78) → s31-eth1_in(78) → s31-eth2_out(76) → s32-eth1_in(76)
+  → s32-eth2_out(74) → s2-eth4_in(74)，最后 s2-eth1_out 还原为 ethertype IPv4(0x0800)
+  UDP 10.0.1.1.1234 > 10.0.2.2.4321；反向同构（s2→s32→s31→s1，栈 4 1 1 1）。
+
+ICMP 回归流量仍只走原路径，s41/s42 保持无流量。
+
+---------------------------------------------------------------------
+5. 原有功能检查（指导书 3.11）
+---------------------------------------------------------------------
+本轮（改动后的 demo02）实测：
+  控制器下发前 pingall：*** Results: 100% dropped (0/2 received)（正常，表项未下发）
+  控制器下发后 pingall：*** Results: 0% dropped (2/2 received)
+  IPv6：h1 -> h2  h1 ping6 -c 2 fe80::5678%eth0 -> 2 packets transmitted, 2 received, 0% packet loss
+  IPv6：h2 -> h1  h2 ping6 -c 2 fe80::1234%eth0 -> 2 packets transmitted, 2 received, 0% packet loss
+  Source Routing：h1 -> h2 端口栈 4 2 2 1、h2 -> h1 端口栈 4 1 1 1 均被对端 receive.py 收到
+  （命令与原始输出见 ev-run2-regression.txt 与截图 3）
+
+新增 Parser 分支未拦截普通 IPv4/ARP/IPv6/SR 报文；普通 UDP 未被误解析为实验报文
+（UDP 目的端口不是 5000 时只做常规解析）。
+
+目的主机本轮的现象（不作为通过条件，指导书 3.14 已说明）：
+  receive-poly.py --expect 1 在 h2/h1 实测 received=0（未还原）。
+  原因是 M5/M6 尚未实现：外层 IPv4 副本按现有 lpm 表项被转发给主机（protocol 253 被
+  内核丢弃），SR 副本在最后一跳由 srcRoute_finish 把 EtherType 还原为 0x0800，负载仍是
+  PolyShim + 内层报文，没有还原成主机原本的 IPv4/UDP 报文。
+
+---------------------------------------------------------------------
+6. 关键证据文件位置（本目录 evidence/）与截图的取法
+---------------------------------------------------------------------
+截图（均取自虚拟机图形终端界面的原始抓屏，未做任何绘制/拼图，2560x1600 原始分辨率）：
+
+  evidence-images/class2-1-one-input-three-replicas.png
+      上窗格 mininet 里 h1 只发一份（一条 POLY_SEND），下窗格 decode-poly.py 解出
+      S1 三个出口的三份副本：同 sequence=1、同 crc32=0x06ba1552、modality 1/2/3。
+  evidence-images/class2-2-three-encapsulations-three-paths.png
+      三出口外层封装（IPv4 proto 253 / IPv6 nextHdr 253 / 0x1234+SR 栈 2 2 1）
+      与三条路径在对端网关 S2 三个入口的汇聚到达。
+  evidence-images/class2-3-original-regression.png
+      pingall 0% dropped (2/2 received)、双向 ping6 0% packet loss、源路由
+      4 2 2 1 / 4 1 1 1 被对端 receive.py 收到。
+  evidence-images/class2-4-reverse-direction.png
+      反向 h2->h1：direction=1、SR 栈 1 1 1(bos)、三份副本同 crc32=0xdd4b3c83。
+  evidence-images/class2-5-control-plane-p4runtime.png
+      S1/S2 的 PRE multicast group 10（出口 2/3/4）与 MyIngress.polymorphic_schedule
+      表项，P4Info 中的表名/动作名。
+
+截图取法（可复现）：
+  1) 在虚拟机桌面上开一个 xterm（DejaVu Sans Mono 11pt），在其中运行 tmux，
+     上窗格跑 mininet（make），下窗格跑 p4 的 python venv shell；
+  2) 命令通过 tmux send-keys 逐条送进对应窗格，窗格内容用 tmux capture-pane 核对；
+  3) 用宿主机命令行抓取虚拟机屏幕：
+       VBoxManage controlvm "P4 Tutorials Development 2026-08-01" screenshotpng <输出.png>
+     即得上述 PNG，未做裁剪/后期处理。
+
+原始文本与抓包：
+
+  ev-run2-class2-forward.txt   正向：s1 三个出口的 tcpdump -nn -e -xx 原文、
+                               decode-poly.py 对 s1 出口与 s2 入口的解码
+  ev-run2-class2-reverse.txt   反向：s2 三个出口的 tcpdump -nn -e -xx 原文、
+                               decode-poly.py 对 s2 出口与 s1 入口的解码
+  ev-run2-control-plane.txt    P4Runtime：S1/S2 的 group 10（端口 2/3/4）、
+                               polymorphic_schedule 表项、P4Info 中的表名/动作名
+  ev-run2-regression.txt       本轮原有功能回归（pingall/ping6/SR/逐跳 0x1234 记录）
+  ev-run2-sender-stdout.txt    正反向各一条 POLY_SEND
+  ev-run1-regression.txt       基线复现（无 class2 流量时的三模态路径证据）
+  ev-run2-mapping-model.txt    指导书 3.2 的映射模型输出与参考结果对照
+  pcaps/                       本轮正反向三个出口与对端三个入口的原始抓包
+
+---------------------------------------------------------------------
+7. 实现说明与与指导书参考方案的差异
+---------------------------------------------------------------------
+a) 外层 IPv4 复用 hdr.ipv4：本镜像 p4c 的 packet.lookahead<T>() 不接受 offset 参数，
+   无法在解析前区分“外层 IPv4”与“普通 IPv4”，因此 Ingress 命中调度时先把 hdr.ipv4
+   整体拷贝到独立的 inner_ipv4 再置无效，Egress 里对 modal 1 重新 setValid() 并改写为外层头。
+   两者不会同时有效，内层始终由 inner_ipv4 保存。
+b) SR 端口栈：源网关的复制发生在 Ingress 之后，自己不再消耗栈元素，因此 Egress 写入的是
+   参考栈去掉源网关第一跳后的剩余栈——正向 [2,2,1]、反向 [1,1,1]（bos 在最后一个元素）。
+   实测三跳均按预期消耗（见第 4 节逐跳长度）。
+c) 外层以太网 MAC 沿用主机原帧（源 MAC = 主机 MAC，目的 = ff:ff:ff:ff:ff:ff），
+   由沿途交换机的 lpm 表项按原方案改写；如需更真实的两层头可在 Egress 按出口写下一跳 MAC。
+d) 环境：镜像缺少 scapy，已用发行版包安装（sudo apt-get install python3-scapy）；
+   截图用的 tmux 亦为发行版包（sudo apt-get install tmux）。
+   未改动 p4c/BMv2/PI/gRPC/Mininet。所有 python3 命令在 source ~/p4setup.bash 后的
+   p4dev python venv 中执行（该 venv 自带 p4runtime、grpc、scapy）。
+e) 实验一产物 ~/demo01 未改动，仍可作为 baseline 对照；本次开发在副本 ~/demo02 进行。
+f) 未执行任何 git 操作（按本次要求暂不处理 git 部分）。

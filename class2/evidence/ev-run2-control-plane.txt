@@ -1,0 +1,55 @@
+CLASS-2 EVIDENCE - control plane (P4Runtime writes by mycontroller.py)
+date: Sat Sep 19 05:46:48 AM EDT 2026
+
+$ grep -A14 multicast_group_entry logs/s1-p4runtime-requests.txt
+      multicast_group_entry {
+        multicast_group_id: 10
+        replicas {
+          egress_port: 2
+          instance: 1
+        }
+        replicas {
+          egress_port: 3
+          instance: 2
+        }
+        replicas {
+          egress_port: 4
+          instance: 3
+        }
+      }
+
+$ grep -A14 multicast_group_entry logs/s2-p4runtime-requests.txt
+      multicast_group_entry {
+        multicast_group_id: 10
+        replicas {
+          egress_port: 2
+          instance: 1
+        }
+        replicas {
+          egress_port: 3
+          instance: 2
+        }
+        replicas {
+          egress_port: 4
+          instance: 3
+        }
+      }
+
+== P4Info names used by the scheduling table ==
+92:    name: "MyIngress.polymorphic_schedule"
+93-    alias: "polymorphic_schedule"
+94-  }
+95-  match_fields {
+209:    name: "MyIngress.start_polymorphic"
+210-    alias: "start_polymorphic"
+211-  }
+212-  params {
+213-    id: 1
+214-    name: "packet_direction"
+215-    bitwidth: 8
+216-  }
+217-}
+
+== scheduling table entries written to each PRE (table_id 40478806) ==
+logs/s1-p4runtime-requests.txt:1
+logs/s2-p4runtime-requests.txt:1
