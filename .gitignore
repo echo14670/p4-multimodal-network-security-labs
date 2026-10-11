@@ -1,0 +1,16 @@
+# 本机自动化与传输缓存
+work/
+transfer/
+transfer_stage/
+
+# P4 运行产物
+class2/polymorphic-scheduling/build/
+class2/polymorphic-scheduling/logs/
+class2/polymorphic-scheduling/pcaps/
+class1/baseline-demo/build/
+class1/baseline-demo/logs/
+class1/baseline-demo/pcaps/
+
+# Python
+__pycache__/
+*.py[cod]

@@ -1,0 +1,57 @@
+RUN 1 - original three-modality regression (no class-2 traffic)
+date: Sat Sep 19 03:47:23 AM EDT 2026
+
+== mininet: pingall / ping6 results are in the interactive transcript ==
+
+== ICMP evidence per path (s11/s12 = IPv4, s21/s22 = IPv6, s31/s32 = SR, s41/s42 = unused) ==
+s11-eth1_in frames=35
+s11-eth2_out frames=2
+s12-eth1_in frames=37
+s12-eth2_out frames=2
+s21-eth1_in frames=30
+s21-eth2_out frames=6
+s22-eth1_in frames=30
+s22-eth2_out frames=6
+s31-eth1_in frames=27
+s31-eth2_out frames=3
+s32-eth1_in frames=34
+s32-eth2_out frames=3
+s41-eth1_in frames=26
+s42-eth2_out frames=0
+
+== source routing forward h1->h2, stack 4 2 2 1 ==
+--- s1-eth4_out (ethertype 0x1234 frames)
+03:44:26.791856 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+--- s31-eth1_in (ethertype 0x1234 frames)
+03:44:26.791949 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+--- s31-eth2_out (ethertype 0x1234 frames)
+03:44:26.797568 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+--- s32-eth1_in (ethertype 0x1234 frames)
+03:44:26.798385 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+--- s32-eth2_out (ethertype 0x1234 frames)
+03:44:26.805347 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+--- s2-eth4_in (ethertype 0x1234 frames)
+03:44:26.805418 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+--- s1-eth4_out hexdump of the source routed frame
+03:44:26.791856 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+	0x0000:  ffff ffff ffff 0800 0000 0101 1234 0002
+	0x0010:  0002 8001 4500 001c 0001 0000 3f11 64ce
+	0x0020:  0a00 0101 0a00 0202 04d2 10e1 0008 d328
+--- s2-eth1_out (decapsulated to h2)
+03:44:26.806872 08:00:00:00:01:01 > ff:ff:ff:ff:ff:ff, ethertype IPv4 (0x0800), length 42: 10.0.1.1.1234 > 10.0.2.2.4321: UDP, length 0
+
+== source routing reverse h2->h1, stack 4 1 1 1 ==
+--- s2-eth4_out (ethertype 0x1234 frames)
+03:46:41.144264 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+--- s32-eth2_in (ethertype 0x1234 frames)
+03:46:41.144285 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 48: 
+--- s32-eth1_out (ethertype 0x1234 frames)
+03:46:41.145420 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+--- s31-eth2_in (ethertype 0x1234 frames)
+03:46:41.145437 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 46: 
+--- s31-eth1_out (ethertype 0x1234 frames)
+03:46:41.146505 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+--- s1-eth4_in (ethertype 0x1234 frames)
+03:46:41.146529 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype Unknown (0x1234), length 44: 
+--- s1-eth1_out (decapsulated to h1)
+03:46:41.147326 08:00:00:00:02:02 > ff:ff:ff:ff:ff:ff, ethertype IPv4 (0x0800), length 42: 10.0.2.2.1234 > 10.0.1.1.4321: UDP, length 0

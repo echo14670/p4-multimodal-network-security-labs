@@ -1,0 +1,6 @@
+﻿# class1 path-summary.txt (fill in after each direction)
+# format: mode | evidence file(s) | switches passed | conclusion
+IPv4 | evidence/... | s11, s12 | PASS, 0% dropped
+IPv6 | evidence/... | s21, s22 | PASS, bidirectional 0% loss
+SR   | evidence/... | s31, s32 | PASS, stacks 4 2 2 1 / 4 1 1 1
+# note: s41/s42 should carry no traffic this round; evidence can be pcap, switch log excerpts or screenshots with context

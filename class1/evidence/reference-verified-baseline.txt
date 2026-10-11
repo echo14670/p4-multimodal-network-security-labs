@@ -1,0 +1,18 @@
+VERIFIED_DATE=2026-08-28
+IMAGE=2026-Aug-01
+OS=Ubuntu 24.04
+VIRTUALIZATION=VMware
+
+basic: 0% dropped (12/12 received)
+original demo compile: PASS, warnings=5 unused ARP constants, errors=0
+controller exit: 0
+IPv4 pingall: 0% dropped (2/2 received)
+IPv6 h1->h2: 0% packet loss, ttl=60
+IPv6 h2->h1: 0% packet loss, ttl=60
+SR h1->h2: stack=4 2 2 1, PASS, ttl=60
+SR h2->h1: stack=4 1 1 1, PASS, ttl=60
+path IPv4: s11/s12 only
+path IPv6: s21/s22 only
+path SR: s31/s32 only
+s41/s42 relevant packets: 0
+clean rerun: PASS
