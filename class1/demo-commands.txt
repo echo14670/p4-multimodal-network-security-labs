@@ -1,0 +1,42 @@
+原三模态 Demo 运行命令
+========================
+
+一、启动
+终端 A：
+  cd ~/p4-multimodal
+  make
+
+终端 B：
+  cd ~/p4-multimodal
+  python3 mycontroller.py
+
+二、IPv4
+mininet> pingall
+*** Ping: testing ping reachability
+h1 -> h2
+h2 -> h1
+*** Results: 0% dropped (2/2 received)
+
+三、IPv6
+mininet> h1 ping6 -c 3 fe80::5678%eth0
+3 packets transmitted, 3 received, 0% packet loss, ttl=60
+
+mininet> h2 ping6 -c 3 fe80::1234%eth0
+3 packets transmitted, 3 received, 0% packet loss, ttl=60
+
+四、Source Routing
+mininet> xterm h1 h2
+h2 xterm: python3 receive.py
+h1 xterm: python3 send-sr.py 10.0.2.2
+  输入：4 2 2 1
+  输入：q
+h2 xterm: python3 send-sr.py 10.0.1.1
+  输入：4 1 1 1
+  输入：q
+实际输出：h2 收到解封装 IPv4/UDP，TTL=60
+（反向也收到一份）
+
+五、清理
+mininet> exit
+make stop
+make clean

@@ -1,0 +1,75 @@
+第二次实验：模态调度与异构封装 成员进度记录
+============================================
+
+组号：第X组
+记录时间：2026-09-19
+组长：颜志航
+
+一、成员分工与进度
+
+1. 颜志航（组长）
+   负责：整体协调、控制器 multicast 配置、S1/S2 调度表项安装、Git 提交与 tag。
+   完成内容：
+   - 组织组员合并第二次实验代码到团队仓库。
+   - 修改 mycontroller.py，加入 group 10 配置。
+   - 启动控制器，确认输出 "Installed multicast group 10 on s1/s2"。
+   - 协调正向和反向复制验证。
+   - 提交第二次作业截图，创建 class2-multicast tag。
+   未解决问题：无。
+
+2. 林为峰
+   负责：Parser 功能完善，UDP 实验报文与三种外层模态报文解析。
+   完成内容：
+   - 在 polymorphic.p4 中增加 UDP 目的端口 5000 的解析分支。
+   - 确保 IPv4、IPv6、SourceRouting 外层封装报文均能进入 PolyShim 和内层 IPv4。
+   - 编译通过，原有 IPv4/IPv6/SR 解析未受影响。
+   未解决问题：无。
+
+3. 罗堉楠
+   负责：Ingress 识别、序号生成、CRC 计算、multicast 触发。
+   完成内容：
+   - 实现源网关识别实验流量，区分普通流量。
+   - 在复制前生成 sequence_number 和 source_crc32，三份副本共享同一序号。
+   - 设置 standard_metadata.mcastgrp = 10，触发 PRE 复制。
+   未解决问题：无。
+
+4. 李江炜
+   负责：Egress 异构封装，按出口端口生成三种外层协议头。
+   完成内容：
+   - 出口端口 2 生成 IPv4 外层，protocol=253。
+   - 出口端口 3 生成 IPv6 外层，nextHdr=253。
+   - 出口端口 4 生成 Source Routing 外层，EtherType=0x1234。
+   - 三份副本 modality_id 分别为 1、2、3。
+   未解决问题：无。
+
+5. 林子涵
+   负责：pcap 抓包、交换机日志分析、路径证据整理。
+   完成内容：
+   - 在 S1 端口 2、3、4 抓包，确认三种封装。
+   - 验证 s1-eth2_out.pcap 为 IPv4 protocol 253，s1-eth3_out.pcap 为 IPv6 next header 253，s1-eth4_out.pcap 为 EtherType 0x1234。
+   - 将关键 pcap 和截图保存到 class2/evidence/。
+   未解决问题：无。
+
+6. 郑锦智
+   负责：原有功能回归测试、反向验证、文档记录。
+   完成内容：
+   - 运行 pingall，确认 0% dropped (2/2 received)。
+   - 运行 IPv6 ping6，确认 3 transmitted, 3 received, 0% packet loss, ttl=60。
+   - 检查 ARP 和 SourceRouting 功能仍正常。
+   - 参与反向复制验证，整理 class2/packet-summary.txt。
+   未解决问题：无。
+
+二、总体进度
+
+- 一份输入在源网关 S1 成功复制成三份，序号相同，模态编号 1/2/3。
+- 三份副本分别进入 IPv4、IPv6、SourceRouting 三条路径。
+- 正向复制验证通过，反向复制也通过。
+- 原有 IPv4、IPv6、ARP、SourceRouting 功能正常。
+- class2/packet-summary.txt 和 class2/evidence/ 已整理。
+- 已创建 class2-multicast tag（待提交）。
+
+三、下一步计划
+
+- 进入第三次实验，实现目的网关 2/3 多数裁决与透明还原。
+- 加入故障注入和自动测试场景。
+- 准备最终小组报告、演示视频和个人材料。
